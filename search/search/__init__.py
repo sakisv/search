@@ -1,0 +1,2 @@
+class Search(object):
+    pass
