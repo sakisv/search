@@ -44,11 +44,10 @@ class Indexer(object):
             documents = [documents]
         documents = self._clean_and_fix(documents)
 
-        self.collection = {}
         for document in documents:
             for field, value in self.fields.iteritems(): 
                 if hasattr(document, field):
-                    self._create_word_collection(getattr(document, field))
+                    collection = self._create_word_collection(getattr(document, field))
 
     def _get_stemmer(self, lang_code):
         '''
@@ -91,7 +90,8 @@ class Indexer(object):
 
     def _create_word_collection(self, document):
         '''
-        Parse the document and create a collection of words and their scores
+        Parse the document, create and return a collection of words 
+        and their scores
         '''
         words = document.split(' ')
 
