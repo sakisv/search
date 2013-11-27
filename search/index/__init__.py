@@ -62,6 +62,19 @@ class Indexer(object):
         # if we get up to this point, everything should be fine
         return True
 
+    def clean_index(self, prefix=None):
+        '''
+        Removes the keys matching that prefix from redis
+        If no prefix is provided, performs a flushdb
+        '''
+
+        if prefix:
+            keys = self.redis.keys('index:%s:*' % prefix)
+            if keys:
+                self.redis.delete(*keys)
+        else:
+            self.redis.flushdb()
+
     def _get_stemmer(self, lang_code):
         '''
         Based on the lang_code, get the appropriate stemmer
