@@ -20,6 +20,7 @@ class Indexer(object):
             'title': 1.5
         }
 
+        # the field we will look for the document's id
         self.id = 'id'
 
         # redis connection to use
