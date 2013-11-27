@@ -7,7 +7,7 @@ import re
 
 class Indexer(object):
 
-    def __init__(self):
+    def __init__(self, redis):
         self.languages = {
             'en': 'english',
             'fr': 'french',
@@ -21,6 +21,9 @@ class Indexer(object):
         }
 
         self.id = 'id'
+
+        # redis connection to use
+        self.redis = redis
 
     def create_reverse_index(self, documents, lang_code='en', fields=None,
             prefix='', id_field=''):
