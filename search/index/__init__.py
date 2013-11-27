@@ -44,6 +44,9 @@ class Indexer(object):
         if fields:
             self.fields = fields
 
+        if id_field:
+            self.id = id_field
+
         # make sure even one document is parsed as list
         try:
             iter(documents)
