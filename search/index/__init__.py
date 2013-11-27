@@ -29,7 +29,7 @@ class Indexer(object):
     def create_reverse_index(self, documents, lang_code='en', fields=None,
             index_name='', id_field='', id_prefix=''):
         '''
-        Creates the reverse for the list of document passed as argument
+        Creates the reverse index for the list of documents passed as argument
         arguments:
         documents: a list of documents to parse
         lang_code: language code for to use for stemming, default: 'en'
@@ -45,7 +45,9 @@ class Indexer(object):
             self.fields = fields
 
         # make sure even one document is parsed as list
-        if type(documents) != list:
+        try:
+            iter(documents)
+        except TypeError:  # not iterable ie. not list-like
             documents = [documents]
         documents = self._clean_and_fix(documents)
 
