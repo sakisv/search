@@ -49,9 +49,17 @@ class Indexer(object):
         documents = self._clean_and_fix(documents)
 
         for document in documents:
-            for field, value in self.fields.iteritems(): 
+            for field, weight in self.fields.iteritems():
                 if hasattr(document, field):
                     collection = self._create_word_collection(getattr(document, field))
+                    for word, score in collection.iteritems():
+                        score *= weight  # update score based on the field's weight
+                        key = 'index:%s:%s' % (index_name, word)
+                        doc_id = '%s%s' % (id_prefix, getattr(document, self.id))
+                        self.redis.zadd(key, score, doc_id)
+
+        # if we get up to this point, everything should be fine
+        return True
 
     def _get_stemmer(self, lang_code):
         '''
