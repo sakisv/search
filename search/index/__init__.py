@@ -26,16 +26,17 @@ class Indexer(object):
         self.redis = redis
 
     def create_reverse_index(self, documents, lang_code='en', fields=None,
-            prefix='', id_field=''):
+            index_name='', id_field='', id_prefix=''):
         '''
         Creates the reverse for the list of document passed as argument
         arguments:
         documents: a list of documents to parse
         lang_code: language code for to use for stemming, default: 'en'
-        fields: a dict of fields in the form of {'field_name': weight}
-            default: {'body': 1, 'title': 1.5}
-        prefix: the prefix of reverse index to be used
+        fields: a dict of fields and weights in the form of
+            {'field_name': weight} default: {'body': 1, 'title': 1.5}
+        index_name: the name of reverse index to be used
         id_field: the id field of the document. default: 'id'
+        id_prefix: when specified, it will prefix the document's id
         '''
         self.stemmer = self._get_stemmer(lang_code)
 
