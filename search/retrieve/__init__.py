@@ -6,12 +6,12 @@ CONTENT_MAP = {
     'a': Page,
 }
 
-class Retrieve(object):
+
+class Retriever(object):
     def __init__(self, redis):
         self.redis = redis
 
-    def retrieve(self, query):
-        context = {'q': query}
+    def retrieve(self, query, indexes):
 
         # collect term indexed data from redis
         data = {}
@@ -33,24 +33,10 @@ class Retrieve(object):
                     union[doc_id]['count'] += 1
 
         # rank result documents
-        ranked = sorted(union,
+        ranked_keys = sorted(union,
             key=lambda x: union[x]['score'] * union[x]['count'], reverse=True)
 
-        # retrieve results from redis
-        results = []
-        for page_key in ranked:
-            page_id, lang = page_key.split('_')
-            page = CONTENT_MAP[page_id[0]]('', page_id, lang)
-            try:
-                page.retrieve()
-            except BadUrlForContent:
-                pass
-            except NoSuchContent:
-                continue
-            results.append(page.content)
-        context['results'] = results
-        return render(request, 'search.html', context)
-
+        return ranked_keys
 
     def _tokeniser(self, query):
         # first fix and clean it
