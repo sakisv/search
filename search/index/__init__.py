@@ -1,8 +1,5 @@
 from .stopwords import STOPWORDS
-from nltk.stem import SnowballStemmer
-from nltk.stem.isri import ISRIStemmer
-from bs4 import BeautifulSoup
-import re
+from ..util import ensure_list, clean_and_fix, get_stemmer
 
 
 class Indexer(object):
@@ -39,7 +36,7 @@ class Indexer(object):
         id_field: the id field of the document. default: 'id'
         id_prefix: when specified, it will prefix the document's id
         '''
-        self.stemmer = self._get_stemmer(lang_code)
+        self.stemmer = get_stemmer(self.languages, lang_code)
 
         if fields:
             self.fields = fields
@@ -48,16 +45,15 @@ class Indexer(object):
             self.id = id_field
 
         # make sure even one document is parsed as list
-        try:
-            iter(documents)
-        except TypeError:  # not iterable ie. not list-like
-            documents = [documents]
-        documents = self._clean_and_fix(documents)
+        documents = ensure_list(documents)
 
         for document in documents:
             for field, weight in self.fields.iteritems():
                 if hasattr(document, field):
-                    collection = self._create_word_collection(getattr(document, field))
+                    item = getattr(document, field)
+                    # fix that field
+                    item = clean_and_fix(item)
+                    collection = self._create_word_collection(item)
                     for word, score in collection.iteritems():
                         score *= weight  # update score based on the field's weight
                         key = 'index:%s:%s' % (index_name, word)
@@ -80,48 +76,10 @@ class Indexer(object):
         else:
             self.redis.flushdb()
 
-    def _get_stemmer(self, lang_code):
-        '''
-        Based on the lang_code, get the appropriate stemmer
-        if no language is supplied, English is assumed
-        '''
-        lang = (self.languages[lang_code] if lang_code in self.languages.keys()
-            else 'english')
-
-        stemmer = SnowballStemmer(lang) if lang != 'arabic' else ISRIStemmer()
-
-        return stemmer
-
-    def _clean_and_fix(self, documents):
-        '''
-        For each field in each document:
-         - remove html tags
-         - remove punctuation
-         - convert all whitespace to single space
-        '''
-        for document in documents:
-            for field in self.fields:
-                if hasattr(document, field):
-                    text = getattr(document, field)
-
-                    # remove html tags
-                    soup = BeautifulSoup(text, 'html.parser')
-                    text = soup.get_text()
-
-                    # remove punctuation
-                    text = re.sub(
-                        r'[!"#\$%&\'\(\)\*\+,\-\./\:;<=>\?@\[\\\]\^_`{|}~]+', '', text)
-
-                    # convert multiple whitespace to a single space
-                    text = re.sub('\s+', ' ', text)
-
-                    # update object with the clean text
-                    setattr(document, field, text)
-        return documents
 
     def _create_word_collection(self, document):
         '''
-        Parse the document, create and return a collection of words 
+        Parse the document, create and return a collection of words
         and their scores
         '''
         words = document.split(' ')
