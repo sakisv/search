@@ -3,6 +3,7 @@ from nltk.stem import SnowballStemmer
 from nltk.stem.isri import ISRIStemmer
 import re
 
+
 def ensure_list(item):
     try:
         iter(item)
@@ -31,10 +32,15 @@ def clean_and_fix(text):
     text = re.sub('\s+', ' ', text)
     return text.lower()
 
+
 def get_stemmer(languages, lang_code):
     '''
     Based on the lang_code, get the appropriate stemmer
     if no language is supplied, English is assumed
+    arguments:
+     - languages: a dict in the form of {'en': 'english', 'it': 'italian'}
+     - lang_code: the language code that will be used to search the keys of
+        the languages argument
     '''
     lang = (languages[lang_code] if lang_code in languages.keys()
         else 'english')
