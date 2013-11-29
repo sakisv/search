@@ -1,14 +1,21 @@
-from ..util import clean_and_fix, ensure_list
+from ..util import clean_and_fix, ensure_list, get_stemmer
 
 
 class Retriever(object):
     def __init__(self, redis):
         self.redis = redis
 
-    def retrieve(self, query, indexes):
+        self.languages = {
+            'en': 'english',
+            'fr': 'french',
+            'es': 'spanish',
+            'ar': 'arabic'
+        }
+
+    def retrieve(self, query, indexes, lang_code):
         # collect term indexed data from redis
         data = {}
-        words = self._tokeniser(query)
+        words = self._tokeniser(query, lang_code)
 
         # build a dict in the form of:
         # data = {
@@ -33,8 +40,8 @@ class Retriever(object):
 
         # process data to produce set of result documents
         union = {}
-        for word in data.keys():
-            for docs in word.values():
+        for word, index_dict in data.iteritems():
+            for docs in index_dict.values():
                 for doc_id, score in docs:
                     if doc_id not in union:  # initialising
                         union[doc_id] = {}
@@ -50,7 +57,9 @@ class Retriever(object):
 
         return ranked_keys
 
-    def _tokeniser(self, query):
+    def _tokeniser(self, query, lang_code):
         # first fix and clean it
         query = clean_and_fix(query)
-        return query.split(' ')
+        words = query.split(' ')
+        stemmer = get_stemmer(self.languages, lang_code)
+        return [stemmer.stem(x) for x in words]
