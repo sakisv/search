@@ -48,6 +48,7 @@ class Indexer(object):
         # make sure even one document is parsed as list
         documents = ensure_list(documents)
 
+        pipe = self.redis.pipeline()
         for document in documents:
             for field, weight in self.fields.iteritems():
                 if hasattr(document, field):
@@ -63,8 +64,9 @@ class Indexer(object):
                         if append_language:
                             doc_id = '%s_%s' % (doc_id, lang_code)
 
-                        self.redis.zadd(key, score, doc_id)
+                        pipe.zadd(key, score, doc_id)
 
+        pipe.execute()
         # if we get up to this point, everything should be fine
         return True
 
