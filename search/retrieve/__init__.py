@@ -1,11 +1,5 @@
 from ..util import clean_and_fix
 
-CONTENT_MAP = {
-    'p': StaticPage,
-    's': Page,
-    'a': Page,
-}
-
 
 class Retriever(object):
     def __init__(self, redis):
