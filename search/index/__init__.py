@@ -76,7 +76,6 @@ class Indexer(object):
         else:
             self.redis.flushdb()
 
-
     def _create_word_collection(self, document):
         '''
         Parse the document, create and return a collection of words
@@ -98,33 +97,3 @@ class Indexer(object):
             collection[w] /= float(count) * 10
 
         return collection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
