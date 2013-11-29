@@ -32,11 +32,10 @@ class Retriever(object):
         # because it's easier to get the list of documents for each word in each index
         indexes = ensure_list(indexes)
         for word in words:
+            data[word] = {}
             for index in indexes:
                 key = 'index:%s:%s' % (index, word)
-                data[word] = {
-                    index: self.redis.zrange(key, 0, -1, withscores=True)
-                }
+                data[word][index] = self.redis.zrange(key, 0, -1, withscores=True)
 
         # process data to produce set of result documents
         union = {}
