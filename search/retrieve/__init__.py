@@ -6,11 +6,11 @@ CONTENT_MAP = {
     'a': Page,
 }
 
-class Search(object):
+class Retrieve(object):
     def __init__(self, redis):
         self.redis = redis
 
-    def search(self, query):
+    def retrieve(self, query):
         context = {'q': query}
 
         # collect term indexed data from redis
