@@ -24,7 +24,7 @@ class Indexer(object):
         self.redis = redis
 
     def create_reverse_index(self, documents, lang_code='en', fields=None,
-            index_name='', id_field='', id_prefix='', append_language=False):
+            index_name='', id_field='', id_prefix='', id_suffix=''):
         '''
         Creates the reverse index for the list of documents passed as argument
         arguments:
@@ -35,7 +35,7 @@ class Indexer(object):
         index_name: the name of reverse index to be used
         id_field: the id field of the document. default: 'id'
         id_prefix: when specified, it will prefix the document's id
-        append_language: append the language code to the doc's id
+        id_suffix: when specified, it will suffix the document's id
         '''
         self.stemmer = get_stemmer(self.languages, lang_code)
 
@@ -59,10 +59,7 @@ class Indexer(object):
                     for word, score in collection.iteritems():
                         score *= weight  # update score based on the field's weight
                         key = 'index:%s:%s' % (index_name, word)
-                        doc_id = '%s%s' % (id_prefix, getattr(document, self.id))
-
-                        if append_language:
-                            doc_id = '%s_%s' % (doc_id, lang_code)
+                        doc_id = '%s%s%s' % (id_prefix, getattr(document, self.id), id_suffix)
 
                         pipe.zadd(key, score, doc_id)
 
