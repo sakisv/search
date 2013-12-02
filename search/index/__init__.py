@@ -75,10 +75,11 @@ class Indexer(object):
 
         if prefix:
             keys = self.redis.keys('index:%s:*' % prefix)
-            if keys:
-                self.redis.delete(*keys)
         else:
-            self.redis.flushdb()
+            keys = self.redis.keys('index:*')
+
+        if keys:
+            self.redis.delete(*keys)
 
     def _create_word_collection(self, document):
         '''
